@@ -164,6 +164,54 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
             </plugin>
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.38.0</version>
+                <executions>
+                    <execution>
+                        <id>build-docker-image</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>push-docker-image</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <images>
+                        <image>
+                            <!--  If the project version ends with -SNAPSHOT then this placeholder is latest, otherwise it`s the full version (same as %v) -->
+                            <name>vladvesa/datatools-server:%l</name>
+                            <alias>datatools-server</alias>
+                            <build>
+                                <tags>
+                                    <tag>latest</tag>
+                                    <tag>${git.commit.id.abbrev}</tag>
+                                </tags>
+                                <dockerFile>Dockerfile</dockerFile>
+                                <assemblies>
+                                    <assembly>
+                                        <name>libs</name>
+                                        <descriptorRef>dependencies</descriptorRef>
+                                    </assembly>
+                                    <assembly>
+                                        <name>.</name>
+                                        <descriptorRef>artifact</descriptorRef>
+                                    </assembly>
+                                </assemblies>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <repositories>
