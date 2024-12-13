@@ -442,22 +442,12 @@ public class Deployment extends Model implements Serializable {
         }
         return customBuildConfig != null
             ? customBuildConfig.getBytes(StandardCharsets.UTF_8)
-            : getProjectBuildConfig();
-    }
-
-    /**
-     * If a project build config exists, return this as a byte array, or null if not available.
-     */
-    private byte[] getProjectBuildConfig() {
-        Project project = parentProject();
-        return project.buildConfig != null
-            ? writeToBytes(project.buildConfig)
             : null;
     }
 
     public String generateBuildConfigAsString() {
         if (customBuildConfig != null) return customBuildConfig;
-        return writeToString(this.parentProject().buildConfig);
+        return null;
     }
 
     /** Convenience method to write serializable object (primarily for router/build config objects) to byte array. */
@@ -487,30 +477,9 @@ public class Deployment extends Model implements Serializable {
             customRouterConfig = downloadedConfig;
         }
 
-        byte[] customRouterConfigString = customRouterConfig != null
+        return customRouterConfig != null
             ? customRouterConfig.getBytes(StandardCharsets.UTF_8)
             : null;
-
-        byte[] routerConfigString = parentProject().routerConfig != null
-            ? writeToBytes(parentProject().routerConfig)
-            : null;
-
-        // If both router configs are present, merge the JSON before returning
-        // Merger code from: https://stackoverflow.com/questions/35747813/how-to-merge-two-json-strings-into-one-in-java
-        if (customRouterConfigString != null && routerConfigString != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> map1 = mapper.readValue(customRouterConfigString, Map.class);
-            Map<String, Object> map2 = mapper.readValue(routerConfigString, Map.class);
-            Map<String, Object> merged = new HashMap<String, Object>(map2);
-            merged.putAll(map1);
-            return mapper.writeValueAsString(merged).getBytes();
-        }
-
-        return customRouterConfigString != null
-            ? customRouterConfigString
-            : routerConfigString != null
-                ? routerConfigString
-                : null;
     }
 
     /** Generate router config for deployment as byte array (for writing to file output stream). */
