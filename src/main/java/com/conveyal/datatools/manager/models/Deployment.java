@@ -446,17 +446,12 @@ public class Deployment extends Model implements Serializable {
     }
 
     public String generateBuildConfigAsString() {
-        if (customBuildConfig != null) return customBuildConfig;
-        return null;
-    }
-
-    /** Convenience method to write serializable object (primarily for router/build config objects) to byte array. */
-    private <O extends Serializable> byte[] writeToBytes(O object) {
         try {
-            return otpConfigMapper.writer().writeValueAsBytes(object);
-        } catch (JsonProcessingException e) {
-            LOG.error("Value contains malformed JSON", e);
-            return null;
+            return new String(generateBuildConfig(), StandardCharsets.UTF_8);
+            // TODO: Correctly generate default build config
+        } catch (Exception e) {
+            LOG.error("Failed to generate build config: ", e);
+            return "";
         }
     }
 
@@ -486,7 +481,8 @@ public class Deployment extends Model implements Serializable {
     public String generateRouterConfigAsString() {
             try {
                 return new String(generateRouterConfig(), StandardCharsets.UTF_8);
-            } catch (IOException e) {
+                // TODO: Correctly generate default router config
+            } catch (Exception e) {
                 LOG.error("Failed to generate router config: ", e);
                 return "";
         }
